@@ -155,6 +155,48 @@
     #cardWrapper{padding:0; background:none;}
     #reportCard{border:none; width:100%;}
   }
+  @media (max-width: 900px){
+    body{ padding-bottom:76px; }
+    .app{ flex-direction:column; min-height:auto; }
+    .form-panel{
+      width:100%;
+      height:auto;
+      max-height:none;
+      overflow-y:visible;
+      position:static;
+      top:auto;
+      border-right:none;
+      border-bottom:1px solid #d7dee5;
+      padding:16px 16px 20px 16px;
+    }
+    .btns{
+      position:fixed;
+      left:0;
+      width:100%;
+      bottom:0;
+      padding:10px 14px;
+      z-index:20;
+    }
+    .preview-panel{
+      padding:14px 6px 90px 6px;
+      overflow-y:visible;
+    }
+    #cardWrapper{
+      padding:10px;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      box-sizing:border-box;
+    }
+    .row2{ grid-template-columns:1fr; }
+    .subject-block .marks-row.cols-3{ grid-template-columns:1fr 1fr 1fr; }
+    .grade-row, .remark-row{ grid-template-columns:1fr; }
+    .grade-row button, .remark-row button{ justify-self:start; }
+  }
+  @media (max-width: 480px){
+    .form-panel h1{ font-size:16px; }
+    button.primary-action{ font-size:12.5px; padding:9px 8px; }
+  }
 </style>
 </head>
 <body>
@@ -259,6 +301,7 @@
   <!-- ===================== PREVIEW PANEL ===================== -->
   <div class="preview-panel">
     <div id="cardWrapper">
+      <div id="cardScaleWrapper">
       <div id="reportCard">
         <div class="rc-header">
           <div class="rc-logo" id="rcLogo"><img id="rcLogoImg" src="" alt="School logo"></div>
@@ -318,6 +361,7 @@
           <div>Signature of Class Teacher</div>
           <div>Signature of Principal</div>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -747,6 +791,8 @@ function recalc(){
     place: document.getElementById('place').value,
     date: rdate ? formatDate(rdate) : '',
   };
+
+  if(typeof fitCardToScreen === 'function') fitCardToScreen();
 }
 
 document.getElementById('formPanel').addEventListener('input', recalc);
@@ -772,6 +818,29 @@ document.getElementById('logoUpload').addEventListener('change', (e) => {
 });
 
 recalc();
+
+// ================= RESPONSIVE SCALE-TO-FIT (mobile) =================
+function fitCardToScreen(){
+  const outer = document.getElementById('cardWrapper');
+  const card = document.getElementById('reportCard');
+  const scaleWrapper = document.getElementById('cardScaleWrapper');
+  const CARD_WIDTH = 750;
+  if(window.innerWidth <= 900){
+    const availableWidth = outer.clientWidth - 4;
+    const scale = Math.min(1, availableWidth / CARD_WIDTH);
+    card.style.transform = `scale(${scale})`;
+    card.style.transformOrigin = 'top left';
+    scaleWrapper.style.width = (CARD_WIDTH * scale) + 'px';
+    scaleWrapper.style.height = (card.offsetHeight * scale) + 'px';
+  } else {
+    card.style.transform = '';
+    scaleWrapper.style.width = '';
+    scaleWrapper.style.height = '';
+  }
+}
+window.addEventListener('resize', fitCardToScreen);
+window.addEventListener('load', fitCardToScreen);
+setTimeout(fitCardToScreen, 50);
 
 // Print
 document.getElementById('printBtn').addEventListener('click', () => window.print());
